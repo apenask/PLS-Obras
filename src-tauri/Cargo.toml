@@ -1,0 +1,17 @@
+[package]
+name = "pls-obras"
+version = "1.0.0"
+description = "PLS Obras - Talão Digital & Compras Externas"
+authors = ["PLS Team"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+# Plugins que quiser (opcional agora):
+# tauri-plugin-shell = "2"
+# tauri-plugin-updater = "2"
+
+# (Deixe SQLite/sqlx/rusqlite para quando formos usá-los de fato)
