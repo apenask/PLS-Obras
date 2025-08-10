@@ -24,7 +24,7 @@ const LoginForm: React.FC = () => {
     const success = login(email, password)
     
     if (!success) {
-      setError('Email ou senha invÃ¡lidos')
+      setError('Email ou senha inválidos')
     }
     
     setLoading(false)
@@ -41,7 +41,7 @@ const LoginForm: React.FC = () => {
           </div>
           <CardTitle className="text-2xl font-bold">PLS Obras</CardTitle>
           <CardDescription>
-            Sistema de TalÃµes Digitais & Compras Externas
+            Sistema de Talões Digitais & Compras Externas
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,7 +85,7 @@ const LoginForm: React.FC = () => {
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              <p>UsuÃ¡rio padrÃ£o: admin@pls.com</p>
+              <p>Usuário padrão: admin@pls.com</p>
               <p>Senha: admin123</p>
             </div>
           </form>

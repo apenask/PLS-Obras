@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Edit, Trash2, Package, Search, Upload, TrendingUp } from 'lucide-react'
 import { useStore } from '@/store/useStore'
@@ -14,44 +14,31 @@ const ProdutosManager: React.FC = () => {
   const { produtos, addProduto, updateProduto, deleteProduto, ajusteEstoque } = useStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'todos' | 'ativos' | 'inativos'>('todos')
+  const [statusFilter, setStatusFilter] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [editingProduto, setEditingProduto] = useState<Produto | null>(null)
   const [showAjusteForm, setShowAjusteForm] = useState(false)
+  const [editingProduto, setEditingProduto] = useState<Produto | null>(null)
   const [ajusteProduto, setAjusteProduto] = useState<Produto | null>(null)
-
-  const [formData, setFormData] = useState({
+  
+  const initialFormData = {
     nome: '',
     categoria: '',
     unidade: '',
     sku: '',
     preco: 0,
     estoque: 0,
+    tipo: 'revenda' as 'interno' | 'revenda',
     ativo: true
-  })
-
+  }
+  const [formData, setFormData] = useState(initialFormData)
+  
   const [ajusteData, setAjusteData] = useState({
     delta: 0,
     motivo: ''
   })
 
-  const resetForm = () => {
-    setFormData({
-      nome: '',
-      categoria: '',
-      unidade: '',
-      sku: '',
-      preco: 0,
-      estoque: 0,
-      ativo: true
-    })
-    setEditingProduto(null)
-    setShowForm(false)
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
     if (editingProduto) {
       updateProduto(editingProduto.id, formData)
     } else {
@@ -70,15 +57,46 @@ const ProdutosManager: React.FC = () => {
     }
   }
 
-  const filteredProdutos = produtos.filter((p) => {
-    const matchesSearch =
-      p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleEdit = (produto: Produto) => {
+    setEditingProduto(produto)
+    setFormData({
+      nome: produto.nome,
+      categoria: produto.categoria || '',
+      unidade: produto.unidade,
+      sku: produto.sku || '',
+      preco: produto.preco || 0,
+      estoque: produto.estoque || 0,
+      tipo: produto.tipo || 'revenda',
+      ativo: produto.ativo
+    })
+    setShowForm(true)
+  }
 
-    const matchesCategory = categoryFilter ? p.categoria === categoryFilter : true
-    const matchesStatus =
-      statusFilter === 'todos' ? true : statusFilter === 'ativos' ? p.ativo : !p.ativo
+  const handleDelete = (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+      deleteProduto(id)
+    }
+  }
 
+  const handleAjusteEstoque = (produto: Produto) => {
+    setAjusteProduto(produto)
+    setShowAjusteForm(true)
+  }
+
+  const resetForm = () => {
+    setFormData(initialFormData)
+    setEditingProduto(null)
+    setShowForm(false)
+  }
+
+  const filteredProdutos = produtos.filter(produto => {
+    const matchesSearch = produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (produto.sku && produto.sku.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesCategory = !categoryFilter || categoryFilter === '__ALL_CATEGORIES__' || produto.categoria === categoryFilter
+    const matchesStatus = !statusFilter || statusFilter === '__ALL_STATUS__' || 
+                         (statusFilter === 'ativo' && produto.ativo) ||
+                         (statusFilter === 'inativo' && !produto.ativo)
+    
     return matchesSearch && matchesCategory && matchesStatus
   })
 
@@ -89,254 +107,286 @@ const ProdutosManager: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
               <Package className="mr-3 h-8 w-8 text-blue-600" />
-              Gerenciar Produtos
+              Gerir Produtos
             </h1>
-            <p className="text-gray-600 mt-2">Cadastro, ediÃ§Ã£o, estoque e anÃ¡lise de produtos.</p>
+            <p className="text-gray-600 mt-2">Registo e controlo de produtos</p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Buscar por nome ou SKU..."
-                className="pl-9 w-[280px]"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Todas as categorias" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__ALL__">Todas</SelectItem>
-                {categorias.map(c => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="ativos">Ativos</SelectItem>
-                <SelectItem value="inativos">Inativos</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Dialog open={showForm} onOpenChange={(o) => { setShowForm(o); if (!o) setEditingProduto(null) }}>
-              <DialogTrigger asChild>
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Novo Produto
-                </Button>
-              </DialogTrigger>
-
-              {/* Form Dialog */}
-              <DialogContent className="p-6 sm:max-w-2xl rounded-2xl border border-slate-200 bg-card text-card-foreground shadow-xl ring-1 ring-black/8 dark:border-neutral-800 dark:ring-white/10">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingProduto ? 'Editar Produto' : 'Novo Produto'}
-                  </DialogTitle>
-                </DialogHeader>
-
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="text-sm font-medium">Nome do Produto</label>
-                    <Input
-                      placeholder="Ex: Cimento CP II-E-32"
-                      value={formData.nome}
-                      onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Categoria</label>
-                    <Input
-                      placeholder="Ex: Materiais BÃ¡sicos"
-                      value={formData.categoria}
-                      onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Unidade</label>
-                    <Input
-                      placeholder="Ex: SC, MÂ³, KG"
-                      value={formData.unidade}
-                      onChange={(e) => setFormData({ ...formData, unidade: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">SKU</label>
-                    <Input
-                      placeholder="Ex: CIM001"
-                      value={formData.sku}
-                      onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">PreÃ§o UnitÃ¡rio</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.preco}
-                      onChange={(e) => setFormData({ ...formData, preco: parseFloat(e.target.value) || 0 })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Estoque Inicial</label>
-                    <Input
-                      type="number"
-                      value={formData.estoque}
-                      onChange={(e) => setFormData({ ...formData, estoque: parseFloat(e.target.value) || 0 })}
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 flex items-center gap-2 mt-2">
-                    <input
-                      id="ativo"
-                      type="checkbox"
-                      className="h-4 w-4"
-                      checked={formData.ativo}
-                      onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                    />
-                    <label htmlFor="ativo" className="text-sm">Produto Ativo</label>
-                  </div>
-
-                  <div className="md:col-span-2 flex items-center justify-end gap-3 mt-2">
-                    <Button type="button" variant="outline" onClick={resetForm}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit">
-                      {editingProduto ? 'Atualizar' : 'Criar Produto'}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+          <div className="flex space-x-2">
+            <Button variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Importar CSV
+            </Button>
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Produto
+            </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Upload className="h-4 w-4" />
-          <span>Importe planilhas de produtos em breve</span>
-          <TrendingUp className="h-4 w-4 ml-3" />
-          <span>RelatÃ³rios e grÃ¡ficos de consumo por obra (em breve)</span>
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Procurar produtos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Todas as categorias" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__ALL_CATEGORIES__">Todas as categorias</SelectItem>
+              {categorias.map(categoria => (
+                <SelectItem key={categoria} value={categoria!}>{categoria}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__ALL_STATUS__">Todos</SelectItem>
+              <SelectItem value="ativo">Ativo</SelectItem>
+              <SelectItem value="inativo">Inativo</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* Ajuste de Estoque */}
-      <Dialog open={showAjusteForm} onOpenChange={(o) => { setShowAjusteForm(o); if (!o) setAjusteProduto(null) }}>
-        <DialogContent className="p-6 sm:max-w-md rounded-2xl border border-slate-200 bg-card text-card-foreground shadow-xl ring-1 ring-black/8 dark:border-neutral-800 dark:ring-white/10">
+      {/* Form Dialog */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              Ajuste de Estoque â€” {ajusteProduto?.nome}
+              {editingProduto ? 'Editar Produto' : 'Novo Produto'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAjusteSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 pt-4">
             <div>
-              <label className="text-sm font-medium">Quantidade (use negativo para saÃ­da)</label>
+              <label className="block text-sm font-medium mb-2">Nome do Produto</label>
+              <Input
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                placeholder="Ex: Cimento CP II-E-32"
+                required
+              />
+            </div>
+             <div>
+              <label className="block text-sm font-medium mb-2">Tipo de Produto</label>
+              <Select value={formData.tipo} onValueChange={(value: 'interno' | 'revenda') => setFormData({ ...formData, tipo: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="revenda">Revenda (compra externa)</SelectItem>
+                  <SelectItem value="interno">Interno (produção própria)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Categoria</label>
+              <Input
+                value={formData.categoria}
+                onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                placeholder="Ex: Materiais Básicos"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Unidade</label>
+              <Input
+                value={formData.unidade}
+                onChange={(e) => setFormData({ ...formData, unidade: e.target.value })}
+                placeholder="Ex: SC, M³, KG"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">SKU</label>
+              <Input
+                value={formData.sku}
+                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                placeholder="Ex: CIM001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Preço de Custo / Venda</label>
               <Input
                 type="number"
-                value={ajusteData.delta}
-                onChange={(e) => setAjusteData({ ...ajusteData, delta: parseFloat(e.target.value) || 0 })}
+                step="0.01"
+                value={formData.preco}
+                onChange={(e) => setFormData({ ...formData, preco: parseFloat(e.target.value) || 0 })}
+                placeholder="0.00"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium">Motivo</label>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-2">Stock Inicial</label>
               <Input
-                placeholder="Ex: correÃ§Ã£o de inventÃ¡rio"
-                value={ajusteData.motivo}
-                onChange={(e) => setAjusteData({ ...ajusteData, motivo: e.target.value })}
+                type="number"
+                value={formData.estoque}
+                onChange={(e) => setFormData({ ...formData, estoque: parseInt(e.target.value) || 0 })}
+                placeholder="0"
               />
             </div>
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setShowAjusteForm(false)}>
+            <div className="flex items-center space-x-2 col-span-2">
+              <input
+                type="checkbox"
+                id="ativo"
+                checked={formData.ativo}
+                onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="ativo" className="text-sm font-medium">
+                Produto Ativo
+              </label>
+            </div>
+            <div className="flex justify-end space-x-2 col-span-2">
+              <Button type="button" variant="outline" onClick={resetForm}>
                 Cancelar
               </Button>
               <Button type="submit">
-                Ajustar Estoque
+                {editingProduto ? 'Atualizar' : 'Criar Produto'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      <Card className="shadow-xl ring-1 ring-black/8">
+      {/* Ajuste Estoque Dialog */}
+      <Dialog open={showAjusteForm} onOpenChange={setShowAjusteForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajustar Stock - {ajusteProduto?.nome}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAjusteSubmit} className="space-y-4 pt-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Stock Atual</label>
+              <Input value={ajusteProduto?.estoque || 0} disabled />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Quantidade (+ entrada / - saída)</label>
+              <Input
+                type="number"
+                value={ajusteData.delta}
+                onChange={(e) => setAjusteData({ ...ajusteData, delta: parseInt(e.target.value) || 0 })}
+                placeholder="Ex: +50 ou -20"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Motivo</label>
+              <Input
+                value={ajusteData.motivo}
+                onChange={(e) => setAjusteData({ ...ajusteData, motivo: e.target.value })}
+                placeholder="Ex: Compra, Venda, Correção"
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setShowAjusteForm(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Ajustar Stock
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Card>
         <CardHeader>
-          <CardTitle>Produtos Cadastrados ({filteredProdutos.length})</CardTitle>
+          <CardTitle>Produtos Registados ({filteredProdutos.length})</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Unidade</TableHead>
-                <TableHead>PreÃ§o</TableHead>
-                <TableHead>Estoque</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">AÃ§Ãµes</TableHead>
+                <TableHead>Preço</TableHead>
+                <TableHead>Stock</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProdutos.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.nome}</TableCell>
-                  <TableCell>{p.categoria}</TableCell>
-                  <TableCell>{p.sku}</TableCell>
-                  <TableCell>{p.unidade}</TableCell>
-                  <TableCell>{toBRL(p.preco)}</TableCell>
-                  <TableCell className="text-green-600 font-semibold">{p.estoque}</TableCell>
+              {filteredProdutos.map((produto) => (
+                <TableRow key={produto.id}>
+                  <TableCell className="font-medium">{produto.nome}</TableCell>
                   <TableCell>
-                    {p.ativo ? (
-                      <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Ativo</span>
-                    ) : (
-                      <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">Inativo</span>
-                    )}
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      produto.tipo === 'interno' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {produto.tipo === 'interno' ? 'Interno' : 'Revenda'}
+                    </span>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="icon" onClick={() => { setEditingProduto(p); setFormData({
-                        nome: p.nome, categoria: p.categoria, unidade: p.unidade, sku: p.sku, preco: p.preco, estoque: p.estoque, ativo: p.ativo
-                      }); setShowForm(true) }}>
+                  <TableCell>{produto.categoria || '-'}</TableCell>
+                  <TableCell>{produto.sku || '-'}</TableCell>
+                  <TableCell>{produto.unidade}</TableCell>
+                  <TableCell>{produto.preco ? toBRL(produto.preco) : '-'}</TableCell>
+                  <TableCell>
+                    <span className={`font-medium ${
+                      (produto.estoque || 0) <= 10 ? 'text-red-600' : 'text-green-600'
+                    }`}>
+                      {produto.estoque || 0}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      produto.ativo 
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {produto.ativo ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(produto)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-
-                      <Button variant="outline" size="icon" onClick={() => { setAjusteProduto(p); setShowAjusteForm(true) }}>
-                        <Package className="h-4 w-4" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAjusteEstoque(produto)}
+                      >
+                        <TrendingUp className="h-4 w-4" />
                       </Button>
-
-                      <Button variant="destructive" size="icon" onClick={() => deleteProduto(p.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(produto.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
-
-              {filteredProdutos.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                    Nenhum produto encontrado.
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
+          
+          {filteredProdutos.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              {searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto registado'}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -344,4 +394,3 @@ const ProdutosManager: React.FC = () => {
 }
 
 export default ProdutosManager
-

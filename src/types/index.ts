@@ -16,6 +16,7 @@ export type Produto = {
   sku?: string;
   preco?: number;
   estoque?: number;
+  tipo?: 'interno' | 'revenda'; // Novo campo para distinguir produtos
   ativo: boolean;
 };
 
@@ -27,7 +28,7 @@ export type Fornecedor = {
   ativo: boolean;
 };
 
-export type TalaoStatus = 'A separar' | 'Em entrega' | 'ConcluÃ­do' | 'Devolvido Parcial' | 'Devolvido Total';
+export type TalaoStatus = 'A separar' | 'Em entrega' | 'Concluído' | 'Devolvido Parcial' | 'Devolvido Total';
 export type OrigemItem = 'estoque' | 'compra_externa';
 
 export type ItemTal = {

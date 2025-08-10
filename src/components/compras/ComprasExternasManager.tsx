@@ -32,7 +32,7 @@ const ComprasExternasManager: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Calcular preÃ§os com markup
+    // Calcular preços com markup
     const itensComPreco = formData.itens.map(item => {
       const produto = produtos.find(p => p.id === item.produtoId)
       const precoUnitObra = aplicarMarkup({
@@ -148,7 +148,7 @@ const ComprasExternasManager: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
               <ShoppingCart className="mr-3 h-8 w-8 text-blue-600" />
               Compras Externas
             </h1>
@@ -208,7 +208,7 @@ const ComprasExternasManager: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">NÃºmero da Nota</label>
+                <label className="block text-sm font-medium mb-2">Número da Nota</label>
                 <Input
                   value={formData.numeroNota}
                   onChange={(e) => setFormData({ ...formData, numeroNota: e.target.value })}
@@ -298,11 +298,11 @@ const ComprasExternasManager: React.FC = () => {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">DescriÃ§Ã£o</label>
+                      <label className="block text-sm font-medium mb-2">Descrição</label>
                       <Input
                         value={item.descricaoLivre}
                         onChange={(e) => updateItem(index, { descricaoLivre: e.target.value })}
-                        placeholder="DescriÃ§Ã£o do item"
+                        placeholder="Descrição do item"
                         required
                       />
                     </div>
@@ -321,7 +321,7 @@ const ComprasExternasManager: React.FC = () => {
                       <Input
                         value={item.unidade}
                         onChange={(e) => updateItem(index, { unidade: e.target.value })}
-                        placeholder="UN, KG, MÂ³"
+                        placeholder="UN, KG, M³"
                         required
                       />
                     </div>
@@ -349,7 +349,7 @@ const ComprasExternasManager: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-2 text-sm text-gray-600">
-                    PreÃ§o para obra (com markup): {toBRL(aplicarMarkup({ custoUnit: item.custoUnit }))}
+                    Preço para obra (com markup): {toBRL(aplicarMarkup({ custoUnit: item.custoUnit }))}
                   </div>
                 </div>
               ))}
@@ -376,13 +376,13 @@ const ComprasExternasManager: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Fornecedor</TableHead>
-                <TableHead>NÂº Nota</TableHead>
+                <TableHead>Nº Nota</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Itens</TableHead>
                 <TableHead>Total Custo</TableHead>
                 <TableHead>Total Receita</TableHead>
                 <TableHead>Anexos</TableHead>
-                <TableHead>AÃ§Ãµes</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -402,7 +402,7 @@ const ComprasExternasManager: React.FC = () => {
                           <div key={item.id} className="text-xs">
                             <span className="font-medium">{item.descricaoLivre}</span>
                             <div className="text-gray-500">
-                              {item.qtd} {item.unidade} Ã— {toBRL(item.custoUnit)} = {toBRL(item.qtd * item.custoUnit)}
+                              {item.qtd} {item.unidade} × {toBRL(item.custoUnit)} = {toBRL(item.qtd * item.custoUnit)}
                             </div>
                           </div>
                         ))}

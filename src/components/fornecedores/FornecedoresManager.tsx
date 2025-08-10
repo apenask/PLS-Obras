@@ -63,11 +63,11 @@ const FornecedoresManager: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
               <Truck className="mr-3 h-8 w-8 text-blue-600" />
-              Gerenciar Fornecedores
+              Gerir Fornecedores
             </h1>
-            <p className="text-gray-600 mt-2">Cadastro e controle de fornecedores</p>
+            <p className="text-gray-600 mt-2">Registo e controlo de fornecedores</p>
           </div>
           <Button onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -79,7 +79,7 @@ const FornecedoresManager: React.FC = () => {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Buscar fornecedores..."
+              placeholder="Procurar fornecedores..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -96,7 +96,7 @@ const FornecedoresManager: React.FC = () => {
               {editingFornecedor ? 'Editar Fornecedor' : 'Novo Fornecedor'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
             <div>
               <label className="block text-sm font-medium mb-2">Nome do Fornecedor</label>
               <Input
@@ -115,7 +115,7 @@ const FornecedoresManager: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Contato</label>
+              <label className="block text-sm font-medium mb-2">Contacto</label>
               <Input
                 value={formData.contato}
                 onChange={(e) => setFormData({ ...formData, contato: e.target.value })}
@@ -148,7 +148,7 @@ const FornecedoresManager: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Fornecedores Cadastrados ({filteredFornecedores.length})</CardTitle>
+          <CardTitle>Fornecedores Registados ({filteredFornecedores.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -156,9 +156,9 @@ const FornecedoresManager: React.FC = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>CNPJ/CPF</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>AÃ§Ãµes</TableHead>
+                <TableHead>Contacto</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -202,7 +202,7 @@ const FornecedoresManager: React.FC = () => {
           
           {filteredFornecedores.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor cadastrado'}
+              {searchTerm ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor registado'}
             </div>
           )}
         </CardContent>

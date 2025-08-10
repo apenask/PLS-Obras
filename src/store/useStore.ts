@@ -5,6 +5,12 @@ import {
   RegraMarkup, Devolucao, AjusteEstoque, Usuario, Config, ID, TalaoStatus 
 } from '@/types';
 import { generateId, generateTalaoNumber } from '@/lib/helpers';
+import { initSupabase, syncToSupabase } from '@/lib/supabase';
+
+// --- AÇÃO NECESSÁRIA ---
+// Coloque as suas credenciais do Supabase aqui.
+const SUPABASE_URL = "https://fbaszthvbtkmweijsupa.supabase.co"; // Substitua pela sua URL
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiYXN6dGh2YnRrbXdlaWpzdXBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjMyODc5NDYsImV4cCI6MjAzODg2Mzk0Nn0.2-J-mX5-w75-s-k-Y-m-Y-m-Y-m-Y-m-Y-m-Y"; // Substitua pela sua chave Anon
 
 interface Store {
   // Data
@@ -38,7 +44,7 @@ interface Store {
   updateFornecedor: (id: ID, fornecedor: Partial<Fornecedor>) => void;
   deleteFornecedor: (id: ID) => void;
   
-  // Actions - TalÃµes
+  // Actions - Talões
   addTalao: (talao: Omit<Talao, 'id' | 'numero' | 'criadoEm'>) => void;
   updateTalao: (id: ID, talao: Partial<Talao>) => void;
   deleteTalao: (id: ID) => void;
@@ -52,7 +58,7 @@ interface Store {
   vincularCompraAoTalao: (itemCompraId: ID, itemTalId: ID, qtd: number) => void;
   
   // Actions - Markup
-  aplicarMarkup: (params: { obraId?: ID; categoria?: string; custoUnit: number }) => number;
+  aplicarMarkup: (params: { obraId?: ID; categoria?: string; custoUnit: number; produtoId?: ID }) => number;
   addRegraMarkup: (regra: Omit<RegraMarkup, 'id'>) => void;
   updateRegraMarkup: (id: ID, regra: Partial<RegraMarkup>) => void;
   deleteRegraMarkup: (id: ID) => void;
@@ -67,6 +73,9 @@ interface Store {
   // Actions - Backup/Restore
   exportData: () => string;
   importData: (jsonData: string) => void;
+
+  // Actions - Sync
+  initSupabaseConnection: () => void;
   
   // Persistence
   loadFromStorage: () => Promise<void>;
@@ -95,377 +104,246 @@ const initialState = {
     markupGlobal: 0.2,
     tema: 'light' as const,
     supabase: {
-      url: '',
-      anonKey: '',
-      enabled: false
+      url: SUPABASE_URL,
+      anonKey: SUPABASE_ANON_KEY,
+      enabled: true
     }
   },
   currentUser: null
 };
 
+const debouncedSync = (() => {
+  let timeout: NodeJS.Timeout;
+  return () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      const state = useStore.getState();
+      if (state.config.supabase?.enabled) {
+        console.log("A sincronizar dados com o Supabase...");
+        syncToSupabase().catch(err => console.error("Falha na sincronização automática:", err));
+      }
+    }, 2000);
+  };
+})();
+
+
 export const useStore = create<Store>((set, get) => ({
   ...initialState,
   
-  // Obras actions
   addObra: (obra) => {
-    const newObra = {
-      ...obra,
-      id: generateId(),
-      criadoEm: new Date().toISOString().split('T')[0]
-    };
+    const newObra = { ...obra, id: generateId(), criadoEm: new Date().toISOString().split('T')[0] };
     set((state) => ({ obras: [...state.obras, newObra] }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   updateObra: (id, obra) => {
-    set((state) => ({
-      obras: state.obras.map(o => o.id === id ? { ...o, ...obra } : o)
-    }));
+    set((state) => ({ obras: state.obras.map(o => o.id === id ? { ...o, ...obra } : o) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   deleteObra: (id) => {
-    set((state) => ({
-      obras: state.obras.filter(o => o.id !== id)
-    }));
+    set((state) => ({ obras: state.obras.filter(o => o.id !== id) }));
     get().saveToStorage();
+    debouncedSync();
   },
   
-  // Produtos actions
   addProduto: (produto) => {
     const newProduto = { ...produto, id: generateId() };
     set((state) => ({ produtos: [...state.produtos, newProduto] }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   updateProduto: (id, produto) => {
-    set((state) => ({
-      produtos: state.produtos.map(p => p.id === id ? { ...p, ...produto } : p)
-    }));
+    set((state) => ({ produtos: state.produtos.map(p => p.id === id ? { ...p, ...produto } : p) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   deleteProduto: (id) => {
-    set((state) => ({
-      produtos: state.produtos.filter(p => p.id !== id)
-    }));
+    set((state) => ({ produtos: state.produtos.filter(p => p.id !== id) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   ajusteEstoque: (produtoId, delta, motivo) => {
-    const ajuste: AjusteEstoque = {
-      id: generateId(),
-      produtoId,
-      delta,
-      motivo,
-      data: new Date().toISOString()
-    };
-    
+    const ajuste: AjusteEstoque = { id: generateId(), produtoId, delta, motivo, data: new Date().toISOString() };
     set((state) => ({
-      produtos: state.produtos.map(p => 
-        p.id === produtoId 
-          ? { ...p, estoque: (p.estoque || 0) + delta }
-          : p
-      ),
+      produtos: state.produtos.map(p => p.id === produtoId ? { ...p, estoque: (p.estoque || 0) + delta } : p),
       ajustesEstoque: [...state.ajustesEstoque, ajuste]
     }));
     get().saveToStorage();
+    debouncedSync();
   },
   
-  // Fornecedores actions
   addFornecedor: (fornecedor) => {
     const newFornecedor = { ...fornecedor, id: generateId() };
     set((state) => ({ fornecedores: [...state.fornecedores, newFornecedor] }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   updateFornecedor: (id, fornecedor) => {
-    set((state) => ({
-      fornecedores: state.fornecedores.map(f => f.id === id ? { ...f, ...fornecedor } : f)
-    }));
+    set((state) => ({ fornecedores: state.fornecedores.map(f => f.id === id ? { ...f, ...fornecedor } : f) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   deleteFornecedor: (id) => {
-    set((state) => ({
-      fornecedores: state.fornecedores.filter(f => f.id !== id)
-    }));
+    set((state) => ({ fornecedores: state.fornecedores.filter(f => f.id !== id) }));
     get().saveToStorage();
+    debouncedSync();
   },
   
-  // TalÃµes actions
   addTalao: (talao) => {
-    const newTalao = {
-      ...talao,
-      id: generateId(),
-      numero: generateTalaoNumber(),
-      criadoEm: new Date().toISOString().split('T')[0]
-    };
+    const newTalao = { ...talao, id: generateId(), numero: generateTalaoNumber(), criadoEm: new Date().toISOString().split('T')[0] };
     set((state) => ({ taloes: [...state.taloes, newTalao] }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   updateTalao: (id, talao) => {
-    set((state) => ({
-      taloes: state.taloes.map(t => t.id === id ? { ...t, ...talao } : t)
-    }));
+    set((state) => ({ taloes: state.taloes.map(t => t.id === id ? { ...t, ...talao } : t) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   deleteTalao: (id) => {
-    set((state) => ({
-      taloes: state.taloes.filter(t => t.id !== id)
-    }));
+    set((state) => ({ taloes: state.taloes.filter(t => t.id !== id) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   concluirEntrega: (talaoId, assinatura) => {
     set((state) => ({
-      taloes: state.taloes.map(t => 
-        t.id === talaoId 
-          ? { ...t, status: 'ConcluÃ­do' as TalaoStatus, assinatura }
-          : t
-      )
+      taloes: state.taloes.map(t => t.id === talaoId ? { ...t, status: 'Concluído' as TalaoStatus, assinatura } : t)
     }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   registrarDevolucao: ({ talaoId, itemTalId, qtd, motivo }) => {
     const state = get();
     const talao = state.taloes.find(t => t.id === talaoId);
     if (!talao) return;
-    
     const item = talao.itens.find(i => i.id === itemTalId);
     if (!item) return;
-    
     const qtdEntregue = item.qtdEntregue || 0;
     const qtdDevolvida = item.qtdDevolvida || 0;
-    
-    if (qtd > (qtdEntregue - qtdDevolvida)) {
-      throw new Error('Quantidade de devoluÃ§Ã£o maior que disponÃ­vel');
-    }
-    
-    // Registrar devoluÃ§Ã£o
-    const devolucao: Devolucao = {
-      id: generateId(),
-      talaoId,
-      itemTalId,
-      qtd,
-      motivo,
-      data: new Date().toISOString()
-    };
-    
-    // Atualizar item
-    const novoItem = {
-      ...item,
-      qtdDevolvida: qtdDevolvida + qtd
-    };
-    
-    // Se origem Ã© estoque, devolver ao estoque
-    if (item.origem === 'estoque' && item.produtoId) {
-      get().ajusteEstoque(item.produtoId, qtd, `DevoluÃ§Ã£o do talÃ£o ${talao.numero}`);
-    }
-    
-    // Recalcular status do talÃ£o
+    if (qtd > (qtdEntregue - qtdDevolvida)) { throw new Error('Quantidade de devolução maior que disponível'); }
+    const devolucao: Devolucao = { id: generateId(), talaoId, itemTalId, qtd, motivo, data: new Date().toISOString() };
+    const novoItem = { ...item, qtdDevolvida: qtdDevolvida + qtd };
+    if (item.origem === 'estoque' && item.produtoId) { get().ajusteEstoque(item.produtoId, qtd, `Devolução do talão ${talao.numero}`); }
     const novosItens = talao.itens.map(i => i.id === itemTalId ? novoItem : i);
     let novoStatus: TalaoStatus = talao.status;
-    
     const totalEntregue = novosItens.reduce((sum, i) => sum + (i.qtdEntregue || 0), 0);
     const totalDevolvido = novosItens.reduce((sum, i) => sum + (i.qtdDevolvida || 0), 0);
-    
-    if (totalDevolvido === totalEntregue && totalDevolvido > 0) {
-      novoStatus = 'Devolvido Total';
-    } else if (totalDevolvido > 0) {
-      novoStatus = 'Devolvido Parcial';
-    }
-    
+    if (totalDevolvido === totalEntregue && totalDevolvido > 0) { novoStatus = 'Devolvido Total'; } else if (totalDevolvido > 0) { novoStatus = 'Devolvido Parcial'; }
     set((state) => ({
-      taloes: state.taloes.map(t => 
-        t.id === talaoId 
-          ? { ...t, itens: novosItens, status: novoStatus }
-          : t
-      ),
+      taloes: state.taloes.map(t => t.id === talaoId ? { ...t, itens: novosItens, status: novoStatus } : t),
       devolucoes: [...state.devolucoes, devolucao]
     }));
-    
     get().saveToStorage();
+    debouncedSync();
   },
   
-  // Compras Externas actions
   addCompraExterna: (compra) => {
-    const itensComMarkup = compra.itens.map(item => ({
-      ...item,
-      precoUnitObra: get().aplicarMarkup({
-        obraId: undefined,
-        categoria: item.produtoId ? get().produtos.find(p => p.id === item.produtoId)?.categoria : undefined,
-        custoUnit: item.custoUnit
-      })
-    }));
-    
-    const newCompra = {
-      ...compra,
-      id: generateId(),
-      itens: itensComMarkup
-    };
-    
+    const itensComMarkup = compra.itens.map(item => ({ ...item, precoUnitObra: get().aplicarMarkup({ obraId: undefined, categoria: item.produtoId ? get().produtos.find(p => p.id === item.produtoId)?.categoria : undefined, custoUnit: item.custoUnit, produtoId: item.produtoId }) }));
+    const newCompra = { ...compra, id: generateId(), itens: itensComMarkup };
     set((state) => ({ compras: [...state.compras, newCompra] }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   updateCompraExterna: (id, compra) => {
-    set((state) => ({
-      compras: state.compras.map(c => c.id === id ? { ...c, ...compra } : c)
-    }));
+    set((state) => ({ compras: state.compras.map(c => c.id === id ? { ...c, ...compra } : c) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   deleteCompraExterna: (id) => {
-    set((state) => ({
-      compras: state.compras.filter(c => c.id !== id)
-    }));
+    set((state) => ({ compras: state.compras.filter(c => c.id !== id) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   vincularCompraAoTalao: (itemCompraId, itemTalId, qtd) => {
-    set((state) => ({
-      taloes: state.taloes.map(talao => ({
-        ...talao,
-        itens: talao.itens.map(item => 
-          item.id === itemTalId
-            ? {
-                ...item,
-                vinculosCompra: [
-                  ...(item.vinculosCompra || []),
-                  { itemCompraId, qtdVinculada: qtd }
-                ]
-              }
-            : item
-        )
-      }))
-    }));
+    set((state) => ({ taloes: state.taloes.map(talao => ({ ...talao, itens: talao.itens.map(item => item.id === itemTalId ? { ...item, vinculosCompra: [...(item.vinculosCompra || []), { itemCompraId, qtdVinculada: qtd }] } : item) })) }));
     get().saveToStorage();
+    debouncedSync();
   },
   
-  // Markup actions
-  aplicarMarkup: ({ obraId, categoria, custoUnit }) => {
+  aplicarMarkup: ({ obraId, categoria, custoUnit, produtoId }) => {
     const state = get();
-    
-    // Procurar regra por obra
-    if (obraId) {
-      const regraObra = state.regrasMarkup.find(r => r.alvo === 'obra' && r.ref === obraId);
-      if (regraObra) {
-        return custoUnit * (1 + regraObra.percentual);
+    if (produtoId) {
+      const produto = state.produtos.find(p => p.id === produtoId);
+      if (produto && produto.tipo === 'interno') {
+        return custoUnit;
       }
     }
-    
-    // Procurar regra por categoria
-    if (categoria) {
-      const regraCategoria = state.regrasMarkup.find(r => r.alvo === 'categoria' && r.ref === categoria);
-      if (regraCategoria) {
-        return custoUnit * (1 + regraCategoria.percentual);
-      }
-    }
-    
-    // Usar regra global
+    if (obraId) { const regraObra = state.regrasMarkup.find(r => r.alvo === 'obra' && r.ref === obraId); if (regraObra) { return custoUnit * (1 + regraObra.percentual); } }
+    if (categoria) { const regraCategoria = state.regrasMarkup.find(r => r.alvo === 'categoria' && r.ref === categoria); if (regraCategoria) { return custoUnit * (1 + regraCategoria.percentual); } }
     const regraGlobal = state.regrasMarkup.find(r => r.alvo === 'global');
     const markup = regraGlobal?.percentual || state.config.markupGlobal;
     return custoUnit * (1 + markup);
   },
-  
   addRegraMarkup: (regra) => {
     const newRegra = { ...regra, id: generateId() };
     set((state) => ({ regrasMarkup: [...state.regrasMarkup, newRegra] }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   updateRegraMarkup: (id, regra) => {
-    set((state) => ({
-      regrasMarkup: state.regrasMarkup.map(r => r.id === id ? { ...r, ...regra } : r)
-    }));
+    set((state) => ({ regrasMarkup: state.regrasMarkup.map(r => r.id === id ? { ...r, ...regra } : r) }));
     get().saveToStorage();
+    debouncedSync();
   },
-  
   deleteRegraMarkup: (id) => {
-    set((state) => ({
-      regrasMarkup: state.regrasMarkup.filter(r => r.id !== id)
-    }));
+    set((state) => ({ regrasMarkup: state.regrasMarkup.filter(r => r.id !== id) }));
     get().saveToStorage();
+    debouncedSync();
   },
   
-  // Auth actions
   login: (email, password) => {
     const user = get().usuarios.find(u => u.email === email && u.ativo);
-    if (user && password === 'admin123') {
-      set({ currentUser: user });
-      return true;
-    }
+    if (user && password === 'admin123') { set({ currentUser: user }); return true; }
     return false;
   },
-  
   logout: () => set({ currentUser: null }),
   
-  // Config actions
   updateConfig: (config) => {
     set((state) => ({ config: { ...state.config, ...config } }));
     get().saveToStorage();
   },
   
-  // Backup/Restore actions
   exportData: () => {
     const state = get();
-    const data = {
-      obras: state.obras,
-      produtos: state.produtos,
-      fornecedores: state.fornecedores,
-      taloes: state.taloes,
-      compras: state.compras,
-      devolucoes: state.devolucoes,
-      regrasMarkup: state.regrasMarkup,
-      ajustesEstoque: state.ajustesEstoque,
-      config: state.config
-    };
+    const data = { obras: state.obras, produtos: state.produtos, fornecedores: state.fornecedores, taloes: state.taloes, compras: state.compras, devolucoes: state.devolucoes, regrasMarkup: state.regrasMarkup, ajustesEstoque: state.ajustesEstoque, config: state.config };
     return JSON.stringify(data, null, 2);
   },
-  
   importData: (jsonData) => {
     try {
       const data = JSON.parse(jsonData);
-      set((state) => ({
-        ...state,
-        ...data
-      }));
+      set((state) => ({ ...state, ...data }));
       get().saveToStorage();
+      debouncedSync();
     } catch (error) {
-      throw new Error('Dados invÃ¡lidos para importaÃ§Ã£o');
+      throw new Error('Dados inválidos para importação');
+    }
+  },
+
+  initSupabaseConnection: () => {
+    const { config } = get();
+    if (config.supabase?.enabled && config.supabase.url && config.supabase.anonKey) {
+      try {
+        initSupabase(config.supabase.url, config.supabase.anonKey);
+        console.log("Conexão com Supabase inicializada.");
+      } catch (error) {
+        console.error("Falha ao inicializar Supabase:", error);
+      }
     }
   },
   
-  // Persistence
   loadFromStorage: async () => {
     try {
       const data = await localforage.getItem('pls-obras-data');
-      if (data) {
-        set((state) => ({ ...state, ...(data as any) }));
-      }
+      if (data) { set((state) => ({ ...state, ...(data as any) })); }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     }
   },
-  
   saveToStorage: async () => {
     try {
       const state = get();
-      const dataToSave = {
-        obras: state.obras,
-        produtos: state.produtos,
-        fornecedores: state.fornecedores,
-        taloes: state.taloes,
-        compras: state.compras,
-        devolucoes: state.devolucoes,
-        regrasMarkup: state.regrasMarkup,
-        ajustesEstoque: state.ajustesEstoque,
-        config: state.config
-      };
+      const dataToSave = { obras: state.obras, produtos: state.produtos, fornecedores: state.fornecedores, taloes: state.taloes, compras: state.compras, devolucoes: state.devolucoes, regrasMarkup: state.regrasMarkup, ajustesEstoque: state.ajustesEstoque, config: state.config };
       await localforage.setItem('pls-obras-data', dataToSave);
     } catch (error) {
       console.error('Erro ao salvar dados:', error);

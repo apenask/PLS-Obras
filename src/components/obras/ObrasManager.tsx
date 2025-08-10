@@ -7,6 +7,8 @@ import { Plus, Edit, Trash2, Building2, Search } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { formatDate } from '@/lib/utils'
 import { Obra } from '@/types'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
 
 const ObrasManager: React.FC = () => {
   const { obras, addObra, updateObra, deleteObra } = useStore()
@@ -33,7 +35,7 @@ const ObrasManager: React.FC = () => {
     setEditingObra(obra)
     setFormData({
       nome: obra.nome,
-      cidade: obra.cidade,
+      cidade: obra.cidade || '',
       ativo: obra.ativo
     })
     setShowForm(true)
@@ -53,7 +55,7 @@ const ObrasManager: React.FC = () => {
 
   const filteredObras = obras.filter(obra =>
     obra.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    obra.cidade.toLowerCase().includes(searchTerm.toLowerCase())
+    (obra.cidade && obra.cidade.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   return (
@@ -61,11 +63,11 @@ const ObrasManager: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
               <Building2 className="mr-3 h-8 w-8 text-blue-600" />
-              Gerenciar Obras
+              Gerir Obras
             </h1>
-            <p className="text-gray-600 mt-2">Cadastro e controle de obras</p>
+            <p className="text-gray-600 mt-2">Registo e controlo de obras</p>
           </div>
           <Button onClick={() => setShowForm(true)} className="flex items-center">
             <Plus className="mr-2 h-4 w-4" />
@@ -77,7 +79,7 @@ const ObrasManager: React.FC = () => {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Buscar obras..."
+              placeholder="Procurar obras..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -86,15 +88,12 @@ const ObrasManager: React.FC = () => {
         </div>
       </div>
 
-      {showForm && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>
-              {editingObra ? 'Editar Obra' : 'Nova Obra'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingObra ? 'Editar Obra' : 'Nova Obra'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Nome da Obra</label>
                 <Input
@@ -109,11 +108,11 @@ const ObrasManager: React.FC = () => {
                 <Input
                   value={formData.cidade}
                   onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
-                  placeholder="Ex: SÃ£o Paulo"
+                  placeholder="Ex: São Paulo"
                   required
                 />
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 pt-4">
                 <input
                   type="checkbox"
                   id="ativo"
@@ -134,13 +133,13 @@ const ObrasManager: React.FC = () => {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
-      )}
+        </DialogContent>
+      </Dialog>
+      
 
       <Card>
         <CardHeader>
-          <CardTitle>Obras Cadastradas ({filteredObras.length})</CardTitle>
+          <CardTitle>Obras Registadas ({filteredObras.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -148,9 +147,9 @@ const ObrasManager: React.FC = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Cidade</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Estado</TableHead>
                 <TableHead>Criado em</TableHead>
-                <TableHead>AÃ§Ãµes</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -194,7 +193,7 @@ const ObrasManager: React.FC = () => {
           
           {filteredObras.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm ? 'Nenhuma obra encontrada' : 'Nenhuma obra cadastrada'}
+              {searchTerm ? 'Nenhuma obra encontrada' : 'Nenhuma obra registada'}
             </div>
           )}
         </CardContent>

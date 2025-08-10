@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 
 const RelatoriosManager: React.FC = () => {
-  const { obras, taloes, compras, devolucoes, fornecedores, produtos } = useStore()
+  const { obras, taloes, compras, devolucoes } = useStore()
   const [obraFilter, setObraFilter] = useState('')
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
@@ -22,19 +22,13 @@ const RelatoriosManager: React.FC = () => {
     return matchesObra && matchesData
   })
 
-  const filteredCompras = compras.filter(compra => {
-    const matchesData = (!dataInicio || compra.data >= dataInicio) && 
-                       (!dataFim || compra.data <= dataFim)
-    return matchesData
-  })
-
   const filteredDevolucoes = devolucoes.filter(devolucao => {
     const matchesData = (!dataInicio || devolucao.data >= dataInicio) && 
                        (!dataFim || devolucao.data <= dataFim)
     return matchesData
   })
 
-  // CÃ¡lculos do resumo
+  // Cálculos do resumo
   const resumoPorObra = obras.map(obra => {
     const taloesObra = filteredTaloes.filter(t => t.obraId === obra.id)
     
@@ -79,26 +73,24 @@ const RelatoriosManager: React.FC = () => {
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new()
     
-    // Aba 1: Resumo por Obra
     const resumoData = resumoPorObra.map(item => ({
       'Obra': item.obra.nome,
       'Cidade': item.obra.cidade,
-      'Qtd TalÃµes': item.qtdTaloes,
+      'Qtd Talões': item.qtdTaloes,
       'Total Estoque': item.totalEstoque,
       'Total Compras Externas': item.totalComprasExternas,
       'Total Geral': item.totalGeral,
       'Total Devolvido': item.totalDevolvido,
-      'LÃ­quido': item.totalGeral - item.totalDevolvido
+      'Líquido': item.totalGeral - item.totalDevolvido
     }))
     
     const wsResumo = XLSX.utils.json_to_sheet(resumoData)
     XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo por Obra')
     
-    // Aba 2: TalÃµes Detalhados
     const taloesData = filteredTaloes.map(talao => {
       const obra = obras.find(o => o.id === talao.obraId)
       return {
-        'NÃºmero': talao.numero,
+        'Número': talao.numero,
         'Obra': obra?.nome,
         'Solicitante': talao.solicitante,
         'Status': talao.status,
@@ -108,9 +100,8 @@ const RelatoriosManager: React.FC = () => {
     })
     
     const wsTaloes = XLSX.utils.json_to_sheet(taloesData)
-    XLSX.utils.book_append_sheet(wb, wsTaloes, 'TalÃµes')
+    XLSX.utils.book_append_sheet(wb, wsTaloes, 'Talões')
     
-    // Aba 3: DevoluÃ§Ãµes
     const devolucoesData = filteredDevolucoes.map(devolucao => {
       const talao = taloes.find(t => t.id === devolucao.talaoId)
       const item = talao?.itens.find(i => i.id === devolucao.itemTalId)
@@ -118,7 +109,7 @@ const RelatoriosManager: React.FC = () => {
       
       return {
         'Data': formatDate(devolucao.data),
-        'TalÃ£o': talao?.numero,
+        'Talão': talao?.numero,
         'Obra': obra?.nome,
         'Item': item?.descricaoLivre,
         'Quantidade': devolucao.qtd,
@@ -128,7 +119,7 @@ const RelatoriosManager: React.FC = () => {
     })
     
     const wsDevol = XLSX.utils.json_to_sheet(devolucoesData)
-    XLSX.utils.book_append_sheet(wb, wsDevol, 'DevoluÃ§Ãµes')
+    XLSX.utils.book_append_sheet(wb, wsDevol, 'Devoluções')
     
     XLSX.writeFile(wb, `relatorio-obras-${new Date().toISOString().split('T')[0]}.xlsx`)
   }
@@ -137,20 +128,19 @@ const RelatoriosManager: React.FC = () => {
     const doc = new jsPDF()
     
     doc.setFontSize(20)
-    doc.text('RelatÃ³rio de Obras', 20, 20)
+    doc.text('Relatório de Obras', 20, 20)
     
     doc.setFontSize(12)
-    doc.text(`PerÃ­odo: ${dataInicio ? formatDate(dataInicio) : 'InÃ­cio'} atÃ© ${dataFim ? formatDate(dataFim) : 'Hoje'}`, 20, 35)
+    doc.text(`Período: ${dataInicio ? formatDate(dataInicio) : 'Início'} até ${dataFim ? formatDate(dataFim) : 'Hoje'}`, 20, 35)
     
     let y = 50
     
-    // Resumo Geral
     doc.setFontSize(16)
     doc.text('Resumo Geral', 20, y)
     y += 15
     
     doc.setFontSize(12)
-    doc.text(`Total de TalÃµes: ${totalGeral.qtdTaloes}`, 20, y)
+    doc.text(`Total de Talões: ${totalGeral.qtdTaloes}`, 20, y)
     y += 10
     doc.text(`Total Estoque: ${toBRL(totalGeral.totalEstoque)}`, 20, y)
     y += 10
@@ -161,7 +151,6 @@ const RelatoriosManager: React.FC = () => {
     doc.text(`Total Devolvido: ${toBRL(totalGeral.totalDevolvido)}`, 20, y)
     y += 20
     
-    // Resumo por Obra
     doc.setFontSize(16)
     doc.text('Resumo por Obra', 20, y)
     y += 15
@@ -177,7 +166,7 @@ const RelatoriosManager: React.FC = () => {
       y += 10
       
       doc.setFontSize(10)
-      doc.text(`TalÃµes: ${item.qtdTaloes} | Total: ${toBRL(item.totalGeral)} | Devolvido: ${toBRL(item.totalDevolvido)}`, 25, y)
+      doc.text(`Talões: ${item.qtdTaloes} | Total: ${toBRL(item.totalGeral)} | Devolvido: ${toBRL(item.totalDevolvido)}`, 25, y)
       y += 15
     })
     
@@ -189,11 +178,11 @@ const RelatoriosManager: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
               <BarChart3 className="mr-3 h-8 w-8 text-blue-600" />
-              RelatÃ³rios
+              Relatórios
             </h1>
-            <p className="text-gray-600 mt-2">AnÃ¡lises e relatÃ³rios do sistema</p>
+            <p className="text-muted-foreground mt-2">Análises e relatórios do sistema</p>
           </div>
           <div className="flex space-x-2">
             <Button onClick={exportToExcel} variant="outline">
@@ -225,9 +214,9 @@ const RelatoriosManager: React.FC = () => {
               type="date"
               value={dataInicio}
               onChange={(e) => setDataInicio(e.target.value)}
-              placeholder="Data inÃ­cio"
+              placeholder="Data início"
             />
-            <span className="text-gray-400">atÃ©</span>
+            <span className="text-gray-400">até</span>
             <Input
               type="date"
               value={dataFim}
@@ -242,7 +231,7 @@ const RelatoriosManager: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total de TalÃµes</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Talões</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalGeral.qtdTaloes}</div>
@@ -251,7 +240,7 @@ const RelatoriosManager: React.FC = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Estoque</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Estoque</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{toBRL(totalGeral.totalEstoque)}</div>
@@ -260,7 +249,7 @@ const RelatoriosManager: React.FC = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Compras Externas</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Compras Externas</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{toBRL(totalGeral.totalComprasExternas)}</div>
@@ -269,7 +258,7 @@ const RelatoriosManager: React.FC = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Devolvido</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Devolvido</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{toBRL(totalGeral.totalDevolvido)}</div>
@@ -287,19 +276,19 @@ const RelatoriosManager: React.FC = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-2">Obra</th>
-                  <th className="text-left p-2">Cidade</th>
-                  <th className="text-right p-2">TalÃµes</th>
-                  <th className="text-right p-2">Estoque</th>
-                  <th className="text-right p-2">Compras Ext.</th>
-                  <th className="text-right p-2">Total</th>
-                  <th className="text-right p-2">Devolvido</th>
-                  <th className="text-right p-2">LÃ­quido</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Obra</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Cidade</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Talões</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Estoque</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Compras Ext.</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Total</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Devolvido</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Líquido</th>
                 </tr>
               </thead>
               <tbody>
                 {resumoPorObra.map(item => (
-                  <tr key={item.obra.id} className="border-b hover:bg-gray-50">
+                  <tr key={item.obra.id} className="border-b transition-colors hover:bg-muted">
                     <td className="p-2 font-medium">{item.obra.nome}</td>
                     <td className="p-2">{item.obra.cidade}</td>
                     <td className="p-2 text-right">{item.qtdTaloes}</td>
@@ -318,28 +307,28 @@ const RelatoriosManager: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* TalÃµes ConcluÃ­dos */}
+      {/* Talões Concluídos */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>TalÃµes ConcluÃ­dos no PerÃ­odo ({filteredTaloes.filter(t => t.status === 'ConcluÃ­do').length})</CardTitle>
+          <CardTitle>Talões Concluídos no Período ({filteredTaloes.filter(t => t.status === 'Concluído').length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-2">NÃºmero</th>
-                  <th className="text-left p-2">Obra</th>
-                  <th className="text-left p-2">Solicitante</th>
-                  <th className="text-left p-2">Data</th>
-                  <th className="text-right p-2">Valor Total</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Número</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Obra</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Solicitante</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Data</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Valor Total</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredTaloes.filter(t => t.status === 'ConcluÃ­do').map(talao => {
+                {filteredTaloes.filter(t => t.status === 'Concluído').map(talao => {
                   const obra = obras.find(o => o.id === talao.obraId)
                   return (
-                    <tr key={talao.id} className="border-b hover:bg-gray-50">
+                    <tr key={talao.id} className="border-b transition-colors hover:bg-muted">
                       <td className="p-2 font-medium">{talao.numero}</td>
                       <td className="p-2">{obra?.nome}</td>
                       <td className="p-2">{talao.solicitante}</td>
@@ -354,23 +343,23 @@ const RelatoriosManager: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* DevoluÃ§Ãµes */}
+      {/* Devoluções */}
       <Card>
         <CardHeader>
-          <CardTitle>DevoluÃ§Ãµes no PerÃ­odo ({filteredDevolucoes.length})</CardTitle>
+          <CardTitle>Devoluções no Período ({filteredDevolucoes.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-2">Data</th>
-                  <th className="text-left p-2">TalÃ£o</th>
-                  <th className="text-left p-2">Obra</th>
-                  <th className="text-left p-2">Item</th>
-                  <th className="text-right p-2">Qtd</th>
-                  <th className="text-left p-2">Motivo</th>
-                  <th className="text-right p-2">Valor</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Data</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Talão</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Obra</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Item</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Qtd</th>
+                  <th className="text-left p-2 font-medium text-muted-foreground">Motivo</th>
+                  <th className="text-right p-2 font-medium text-muted-foreground">Valor</th>
                 </tr>
               </thead>
               <tbody>
@@ -381,7 +370,7 @@ const RelatoriosManager: React.FC = () => {
                   const valor = (item?.precoUnit || 0) * devolucao.qtd
                   
                   return (
-                    <tr key={devolucao.id} className="border-b hover:bg-gray-50">
+                    <tr key={devolucao.id} className="border-b transition-colors hover:bg-muted">
                       <td className="p-2">{formatDate(devolucao.data)}</td>
                       <td className="p-2 font-medium">{talao?.numero}</td>
                       <td className="p-2">{obra?.nome}</td>

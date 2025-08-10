@@ -80,20 +80,18 @@ const ConfiguracoesManager: React.FC = () => {
         importData(jsonData)
         alert('Dados importados com sucesso!')
       } catch (error) {
-        alert('Erro ao importar dados. Verifique se o arquivo está correto.')
+        alert('Erro ao importar dados. Verifique se o ficheiro está correto.')
       }
     }
     reader.readAsText(file)
   }
-
-  const categorias = [...new Set(regrasMarkup.filter(r => r.alvo === 'categoria').map(r => r.ref))]
 
   return (
     <div className="p-6">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
               <Settings className="mr-3 h-8 w-8 text-blue-600" />
               Configurações
             </h1>
@@ -183,7 +181,7 @@ const ConfiguracoesManager: React.FC = () => {
                   {editingRegra ? 'Editar Regra de Mark-up' : 'Nova Regra de Mark-up'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleMarkupSubmit} className="space-y-4">
+              <form onSubmit={handleMarkupSubmit} className="space-y-4 pt-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Tipo</label>
                   <Select 
@@ -322,7 +320,7 @@ const ConfiguracoesManager: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-medium mb-2">Importar Dados</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Restaure os dados do sistema a partir de um arquivo de backup.
+                    Restaure os dados do sistema a partir de um ficheiro de backup.
                   </p>
                   <Input
                     type="file"
