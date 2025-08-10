@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, FileText, Truck, DollarSign, TrendingUp, Package, Undo2 } from 'lucide-react'
 import { toBRL, qtdLiquidaItem, valorTotalTalao } from '@/lib/helpers'
@@ -7,7 +7,7 @@ import { useStore } from '@/store/useStore'
 const Dashboard: React.FC = () => {
   const { obras, taloes, compras, produtos, devolucoes } = useStore()
   
-  const taloesAbertos = taloes.filter(t => !['Concluído', 'Devolvido Total'].includes(t.status)).length
+  const taloesAbertos = taloes.filter(t => !['ConcluÃ­do', 'Devolvido Total'].includes(t.status)).length
   const entregasHoje = taloes.filter(t => 
     t.status === 'Em entrega' && 
     t.criadoEm === new Date().toISOString().split('T')[0]
@@ -26,9 +26,9 @@ const Dashboard: React.FC = () => {
 
   const kpiCards = [
     {
-      title: 'Talões Abertos',
+      title: 'TalÃµes Abertos',
       value: taloesAbertos,
-      description: 'Aguardando separação/entrega',
+      description: 'Aguardando separaÃ§Ã£o/entrega',
       icon: FileText,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50'
@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
     {
       title: 'Entregas Hoje',
       value: entregasHoje,
-      description: 'Talões em entrega hoje',
+      description: 'TalÃµes em entrega hoje',
       icon: Truck,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
     {
       title: 'Custo Total',
       value: toBRL(totalCusto),
-      description: 'Compras externas no período',
+      description: 'Compras externas no perÃ­odo',
       icon: DollarSign,
       color: 'text-red-600',
       bgColor: 'bg-red-50'
@@ -52,7 +52,7 @@ const Dashboard: React.FC = () => {
     {
       title: 'Receita Total',
       value: toBRL(totalReceita),
-      description: 'Valor repassado às obras',
+      description: 'Valor repassado Ã s obras',
       icon: TrendingUp,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
@@ -67,7 +67,7 @@ const Dashboard: React.FC = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Visão geral do sistema PLS Obras</p>
+        <p className="text-gray-600 mt-2">VisÃ£o geral do sistema PLS Obras</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -104,13 +104,13 @@ const Dashboard: React.FC = () => {
               Obras Ativas ({obrasAtivas.length})
             </CardTitle>
             <CardDescription>
-              Últimas movimentações por obra
+              Ãšltimas movimentaÃ§Ãµes por obra
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {obrasAtivas.slice(0, 3).map((obra) => {
-                const taloesObra = taloes.filter(t => t.obraId === obra.id && !['Concluído', 'Devolvido Total'].includes(t.status))
+                const taloesObra = taloes.filter(t => t.obraId === obra.id && !['ConcluÃ­do', 'Devolvido Total'].includes(t.status))
                 const valorTotal = taloes
                   .filter(t => t.obraId === obra.id)
                   .reduce((sum, t) => sum + valorTotalTalao(t), 0)
@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
                       <p className="text-sm text-gray-600">{obra.cidade}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">{taloesObra.length} talões abertos</p>
+                      <p className="text-sm font-medium">{taloesObra.length} talÃµes abertos</p>
                       <p className="text-xs text-gray-500">{toBRL(valorTotal)}</p>
                     </div>
                   </div>
@@ -139,7 +139,7 @@ const Dashboard: React.FC = () => {
               Produtos - Baixo Estoque ({produtosBaixoEstoque.length})
             </CardTitle>
             <CardDescription>
-              Produtos com estoque baixo (≤ 10)
+              Produtos com estoque baixo (â‰¤ 10)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -169,10 +169,10 @@ const Dashboard: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Undo2 className="h-5 w-5 mr-2 text-orange-600" />
-              Devoluções Hoje ({devolucoesHoje})
+              DevoluÃ§Ãµes Hoje ({devolucoesHoje})
             </CardTitle>
             <CardDescription>
-              Devoluções registradas hoje
+              DevoluÃ§Ãµes registradas hoje
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
                 })}
               {devolucoesHoje === 0 && (
                 <p className="text-sm text-gray-500 text-center py-4">
-                  Nenhuma devolução hoje
+                  Nenhuma devoluÃ§Ã£o hoje
                 </p>
               )}
             </div>
@@ -208,17 +208,17 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Resumo de Status dos Talões */}
+      {/* Resumo de Status dos TalÃµes */}
       <Card>
         <CardHeader>
-          <CardTitle>Status dos Talões</CardTitle>
+          <CardTitle>Status dos TalÃµes</CardTitle>
           <CardDescription>
-            Distribuição dos talões por status
+            DistribuiÃ§Ã£o dos talÃµes por status
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {['A separar', 'Em entrega', 'Concluído', 'Devolvido Parcial', 'Devolvido Total'].map(status => {
+            {['A separar', 'Em entrega', 'ConcluÃ­do', 'Devolvido Parcial', 'Devolvido Total'].map(status => {
               const count = taloes.filter(t => t.status === status).length
               const percentage = taloes.length > 0 ? (count / taloes.length * 100).toFixed(1) : '0'
               
@@ -226,7 +226,7 @@ const Dashboard: React.FC = () => {
                 switch (status) {
                   case 'A separar': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
                   case 'Em entrega': return 'bg-blue-100 text-blue-800 border-blue-200'
-                  case 'Concluído': return 'bg-green-100 text-green-800 border-green-200'
+                  case 'ConcluÃ­do': return 'bg-green-100 text-green-800 border-green-200'
                   case 'Devolvido Parcial': return 'bg-orange-100 text-orange-800 border-orange-200'
                   case 'Devolvido Total': return 'bg-red-100 text-red-800 border-red-200'
                   default: return 'bg-gray-100 text-gray-800 border-gray-200'

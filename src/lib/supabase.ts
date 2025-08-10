@@ -1,8 +1,8 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+﻿import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { useStore } from "@/store/useStore";
 
 /* ------------------------------------------------------------------ */
-/*  Inicialização                                                      */
+/*  InicializaÃ§Ã£o                                                      */
 /* ------------------------------------------------------------------ */
 let supabaseClient: SupabaseClient | null = null;
 
@@ -15,7 +15,7 @@ export function initSupabase(url?: string, anonKey?: string) {
 }
 
 export function getSupabaseClient() {
-  if (!supabaseClient) throw new Error("Supabase não foi inicializado");
+  if (!supabaseClient) throw new Error("Supabase nÃ£o foi inicializado");
   return supabaseClient;
 }
 
@@ -209,10 +209,11 @@ export async function syncFromSupabase() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Observação sobre criação de tabelas                               */
+/*  ObservaÃ§Ã£o sobre criaÃ§Ã£o de tabelas                               */
 /* ------------------------------------------------------------------ */
-// Não é seguro/viável criar tabelas a partir do front com a chave "anon".
+// NÃ£o Ã© seguro/viÃ¡vel criar tabelas a partir do front com a chave "anon".
 // Remova createSupabaseTables() do cliente.
 // Crie as tabelas 1x no painel SQL do Supabase (ou automatize via:
 //  a) Supabase CLI migrations, ou
 //  b) backend Tauri (Rust) usando service_role de forma segura).
+

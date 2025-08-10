@@ -1,4 +1,4 @@
-import { Obra, Produto, Fornecedor, Talao, CompraExterna, Usuario, MarkupRule } from '@/types'
+﻿import { Obra, Produto, Fornecedor, Talao, CompraExterna, Usuario, MarkupRule } from '@/types'
 import { generateId } from '@/lib/utils'
 
 // Mock data for development
@@ -6,7 +6,7 @@ export const mockObras: Obra[] = [
   {
     id: '1',
     nome: 'Obra Residencial Centro',
-    cidade: 'São Paulo',
+    cidade: 'SÃ£o Paulo',
     ativo: true,
     criadoEm: '2024-01-15'
   },
@@ -30,24 +30,24 @@ export const mockProdutos: Produto[] = [
   {
     id: '1',
     nome: 'Cimento CP II-E-32',
-    categoria: 'Materiais Básicos',
+    categoria: 'Materiais BÃ¡sicos',
     unidade: 'SC',
     sku: 'CIM001',
     ativo: true
   },
   {
     id: '2',
-    nome: 'Areia Média',
-    categoria: 'Materiais Básicos',
-    unidade: 'M³',
+    nome: 'Areia MÃ©dia',
+    categoria: 'Materiais BÃ¡sicos',
+    unidade: 'MÂ³',
     sku: 'ARE001',
     ativo: true
   },
   {
     id: '3',
     nome: 'Brita 1',
-    categoria: 'Materiais Básicos',
-    unidade: 'M³',
+    categoria: 'Materiais BÃ¡sicos',
+    unidade: 'MÂ³',
     sku: 'BRI001',
     ativo: true
   },
@@ -61,7 +61,7 @@ export const mockProdutos: Produto[] = [
   },
   {
     id: '5',
-    nome: 'Vergalhão CA-50 8mm',
+    nome: 'VergalhÃ£o CA-50 8mm',
     categoria: 'Estrutura',
     unidade: 'KG',
     sku: 'VER001',
@@ -98,7 +98,7 @@ export const mockTaloes: Talao[] = [
     id: '1',
     numero: 'TAL-001234',
     obraId: '1',
-    solicitante: 'João Silva',
+    solicitante: 'JoÃ£o Silva',
     status: 'A separar',
     itens: [
       {
@@ -114,9 +114,9 @@ export const mockTaloes: Talao[] = [
       {
         id: '2',
         produtoId: '2',
-        descricao: 'Areia Média',
+        descricao: 'Areia MÃ©dia',
         qtd: 2,
-        unidade: 'M³',
+        unidade: 'MÂ³',
         origem: 'compra_externa',
         precoUnit: 45.00,
         total: 90.00
@@ -156,9 +156,9 @@ export const mockComprasExternas: CompraExterna[] = [
     itens: [
       {
         id: '1',
-        descricao: 'Areia Média Lavada',
+        descricao: 'Areia MÃ©dia Lavada',
         qtd: 5,
-        unidade: 'M³',
+        unidade: 'MÂ³',
         custoUnit: 35.00,
         markup: 0.20,
         precoUnitObra: 42.00,
@@ -168,7 +168,7 @@ export const mockComprasExternas: CompraExterna[] = [
         id: '2',
         descricao: 'Brita 1 Limpa',
         qtd: 3,
-        unidade: 'M³',
+        unidade: 'MÂ³',
         custoUnit: 40.00,
         markup: 0.20,
         precoUnitObra: 48.00,
@@ -191,7 +191,7 @@ export const mockUsuarios: Usuario[] = [
   },
   {
     id: '2',
-    nome: 'João Compras',
+    nome: 'JoÃ£o Compras',
     email: 'compras@pls.com',
     role: 'compras',
     ativo: true
@@ -214,7 +214,7 @@ export const mockMarkupRules: MarkupRule[] = [
   {
     id: '2',
     tipo: 'categoria',
-    referencia: 'Materiais Básicos',
+    referencia: 'Materiais BÃ¡sicos',
     percentual: 0.15
   },
   {

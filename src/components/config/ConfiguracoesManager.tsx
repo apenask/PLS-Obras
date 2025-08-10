@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Settings, Plus, Edit, Trash2, Download, Upload, Percent } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { RegraMarkup } from '@/types'
-import { initSupabase, testConnection, syncToSupabase, syncFromSupabase } from "@/lib/supabase";
 
 const ConfiguracoesManager: React.FC = () => {
   const { 
@@ -24,17 +23,6 @@ const ConfiguracoesManager: React.FC = () => {
     ref: '',
     percentual: 0.2
   })
-  
-  // Estados para Supabase
-  const [supabaseConfig, setSupabaseConfig] = useState({
-    url: config.supabase?.url || '',
-    anonKey: config.supabase?.anonKey || '',
-    enabled: config.supabase?.enabled || false
-  })
-  const [testingConnection, setTestingConnection] = useState(false)
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [syncing, setSyncing] = useState(false)
-  const [syncResults, setSyncResults] = useState<any>(null)
 
   const handleMarkupSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,103 +86,6 @@ const ConfiguracoesManager: React.FC = () => {
     reader.readAsText(file)
   }
 
-  const handleSupabaseConfigSave = () => {
-    updateConfig({
-      supabase: {
-        ...supabaseConfig,
-        lastSync: config.supabase?.lastSync
-      }
-    })
-    
-    if (supabaseConfig.enabled && supabaseConfig.url && supabaseConfig.anonKey) {
-      try {
-        initSupabase(supabaseConfig.url, supabaseConfig.anonKey)
-        alert('Configuração do Supabase salva com sucesso!')
-      } catch (error) {
-        alert('Erro na configuração do Supabase. Verifique os dados.')
-      }
-    }
-  }
-
-  const handleTestConnection = async () => {
-    if (!supabaseConfig.url || !supabaseConfig.anonKey) {
-      alert('Preencha a URL e a chave da API primeiro')
-      return
-    }
-
-    setTestingConnection(true)
-    setConnectionStatus('idle')
-    
-    try {
-      initSupabase(supabaseConfig.url, supabaseConfig.anonKey)
-      const success = await testConnection()
-      
-      if (success) {
-        setConnectionStatus('success')
-      } else {
-        setConnectionStatus('error')
-      }
-    } catch (error) {
-      setConnectionStatus('error')
-    } finally {
-      setTestingConnection(false)
-    }
-  }
-
-  const handleCreateTables = async () => {
-    if (!supabaseConfig.enabled) {
-      alert('Configure e ative o Supabase primeiro')
-      return
-    }
-
-    try {
-      await createSupabaseTables()
-      alert('Tabelas criadas com sucesso no Supabase!')
-    } catch (error) {
-      alert('Erro ao criar tabelas. Verifique as permissões no Supabase.')
-    }
-  }
-
-  const handleSyncToSupabase = async () => {
-    if (!supabaseConfig.enabled) {
-      alert('Configure e ative o Supabase primeiro')
-      return
-    }
-
-    setSyncing(true)
-    setSyncResults(null)
-    
-    try {
-      const results = await syncToSupabase()
-      setSyncResults(results)
-      alert('Sincronização para Supabase concluída!')
-    } catch (error) {
-      alert('Erro na sincronização: ' + (error as Error).message)
-    } finally {
-      setSyncing(false)
-    }
-  }
-
-  const handleSyncFromSupabase = async () => {
-    if (!supabaseConfig.enabled) {
-      alert('Configure e ative o Supabase primeiro')
-      return
-    }
-
-    setSyncing(true)
-    setSyncResults(null)
-    
-    try {
-      const results = await syncFromSupabase()
-      setSyncResults(results)
-      alert('Sincronização do Supabase concluída!')
-    } catch (error) {
-      alert('Erro na sincronização: ' + (error as Error).message)
-    } finally {
-      setSyncing(false)
-    }
-  }
-
   const categorias = [...new Set(regrasMarkup.filter(r => r.alvo === 'categoria').map(r => r.ref))]
 
   return (
@@ -216,7 +107,6 @@ const ConfiguracoesManager: React.FC = () => {
           <TabsTrigger value="markup">Mark-up</TabsTrigger>
           <TabsTrigger value="tema">Tema</TabsTrigger>
           <TabsTrigger value="backup">Backup/Restore</TabsTrigger>
-          <TabsTrigger value="sync">Sincronização</TabsTrigger>
         </TabsList>
 
         <TabsContent value="markup" className="space-y-6">
@@ -440,150 +330,6 @@ const ConfiguracoesManager: React.FC = () => {
                     onChange={handleImportData}
                     className="w-64"
                   />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="sync" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sincronização com Supabase</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Configuração */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Configuração</h3>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="supabase-enabled"
-                      checked={supabaseConfig.enabled}
-                      onChange={(e) => setSupabaseConfig({ ...supabaseConfig, enabled: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="supabase-enabled" className="text-sm font-medium">
-                      Ativar sincronização com Supabase
-                    </label>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">URL do Supabase</label>
-                    <Input 
-                      value={supabaseConfig.url}
-                      onChange={(e) => setSupabaseConfig({ ...supabaseConfig, url: e.target.value })}
-                      placeholder="https://seu-projeto.supabase.co"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Chave da API (anon/public)</label>
-                    <Input 
-                      type="password"
-                      value={supabaseConfig.anonKey}
-                      onChange={(e) => setSupabaseConfig({ ...supabaseConfig, anonKey: e.target.value })}
-                      placeholder="sua-chave-api-publica"
-                    />
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button onClick={handleSupabaseConfigSave}>
-                      Salvar Configuração
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleTestConnection}
-                      disabled={testingConnection || !supabaseConfig.url || !supabaseConfig.anonKey}
-                    >
-                      {testingConnection ? 'Testando...' : 'Testar Conexão'}
-                    </Button>
-                  </div>
-
-                  {connectionStatus === 'success' && (
-                    <div className="text-green-600 text-sm">
-                      ✅ Conexão com Supabase estabelecida com sucesso!
-                    </div>
-                  )}
-                  
-                  {connectionStatus === 'error' && (
-                    <div className="text-red-600 text-sm">
-                      ❌ Erro na conexão. Verifique a URL e chave da API.
-                    </div>
-                  )}
-                </div>
-
-                {/* Preparação do Banco */}
-                <div className="space-y-4 border-t pt-6">
-                  <h3 className="text-lg font-medium">Preparação do Banco</h3>
-                  <p className="text-sm text-gray-600">
-                    Antes da primeira sincronização, é necessário criar as tabelas no Supabase.
-                  </p>
-                  <Button 
-                    onClick={handleCreateTables}
-                    disabled={!supabaseConfig.enabled}
-                    variant="outline"
-                  >
-                    Criar Tabelas no Supabase
-                  </Button>
-                </div>
-
-                {/* Sincronização */}
-                <div className="space-y-4 border-t pt-6">
-                  <h3 className="text-lg font-medium">Sincronização</h3>
-                  
-                  {config.supabase?.lastSync && (
-                    <p className="text-sm text-gray-600">
-                      Última sincronização: {new Date(config.supabase.lastSync).toLocaleString('pt-BR')}
-                    </p>
-                  )}
-
-                  <div className="flex space-x-2">
-                    <Button 
-                      onClick={handleSyncToSupabase}
-                      disabled={!supabaseConfig.enabled || syncing}
-                    >
-                      {syncing ? 'Sincronizando...' : 'Enviar para Supabase'}
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={handleSyncFromSupabase}
-                      disabled={!supabaseConfig.enabled || syncing}
-                    >
-                      {syncing ? 'Sincronizando...' : 'Receber do Supabase'}
-                    </Button>
-                  </div>
-
-                  {syncResults && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-medium mb-2">Resultados da Sincronização:</h4>
-                      <div className="text-sm space-y-1">
-                        {Object.entries(syncResults).map(([key, value]) => (
-                          <div key={key}>
-                            <strong>{key}:</strong> {typeof value === 'object' ? 
-                              `${(value as any).success || value} sucesso, ${(value as any).errors || 0} erros` : 
-                              `${value} registros`
-                            }
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Instruções */}
-                <div className="space-y-4 border-t pt-6">
-                  <h3 className="text-lg font-medium">Instruções</h3>
-                  <div className="text-sm text-gray-600 space-y-2">
-                    <p><strong>1.</strong> Crie um projeto no Supabase (supabase.com)</p>
-                    <p><strong>2.</strong> Copie a URL do projeto e a chave anon/public</p>
-                    <p><strong>3.</strong> Cole as informações acima e salve</p>
-                    <p><strong>4.</strong> Teste a conexão</p>
-                    <p><strong>5.</strong> Crie as tabelas necessárias</p>
-                    <p><strong>6.</strong> Execute a sincronização</p>
-                  </div>
                 </div>
               </div>
             </CardContent>

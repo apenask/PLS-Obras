@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -93,7 +93,7 @@ const ProdutosManager: React.FC = () => {
               <Package className="mr-3 h-8 w-8 text-blue-600" />
               Gerenciar Produtos
             </h1>
-            <p className="text-gray-600 mt-2">Cadastro, edição, estoque e análise de produtos.</p>
+            <p className="text-gray-600 mt-2">Cadastro, ediÃ§Ã£o, estoque e anÃ¡lise de produtos.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -112,7 +112,7 @@ const ProdutosManager: React.FC = () => {
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="__ALL__">Todas</SelectItem>
                 {categorias.map(c => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
@@ -160,7 +160,7 @@ const ProdutosManager: React.FC = () => {
                   <div>
                     <label className="text-sm font-medium">Categoria</label>
                     <Input
-                      placeholder="Ex: Materiais Básicos"
+                      placeholder="Ex: Materiais BÃ¡sicos"
                       value={formData.categoria}
                       onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
                     />
@@ -169,7 +169,7 @@ const ProdutosManager: React.FC = () => {
                   <div>
                     <label className="text-sm font-medium">Unidade</label>
                     <Input
-                      placeholder="Ex: SC, M³, KG"
+                      placeholder="Ex: SC, MÂ³, KG"
                       value={formData.unidade}
                       onChange={(e) => setFormData({ ...formData, unidade: e.target.value })}
                       required
@@ -186,7 +186,7 @@ const ProdutosManager: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Preço Unitário</label>
+                    <label className="text-sm font-medium">PreÃ§o UnitÃ¡rio</label>
                     <Input
                       type="number"
                       step="0.01"
@@ -233,7 +233,7 @@ const ProdutosManager: React.FC = () => {
           <Upload className="h-4 w-4" />
           <span>Importe planilhas de produtos em breve</span>
           <TrendingUp className="h-4 w-4 ml-3" />
-          <span>Relatórios e gráficos de consumo por obra (em breve)</span>
+          <span>RelatÃ³rios e grÃ¡ficos de consumo por obra (em breve)</span>
         </div>
       </div>
 
@@ -242,12 +242,12 @@ const ProdutosManager: React.FC = () => {
         <DialogContent className="p-6 sm:max-w-md rounded-2xl border border-slate-200 bg-card text-card-foreground shadow-xl ring-1 ring-black/8 dark:border-neutral-800 dark:ring-white/10">
           <DialogHeader>
             <DialogTitle>
-              Ajuste de Estoque — {ajusteProduto?.nome}
+              Ajuste de Estoque â€” {ajusteProduto?.nome}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAjusteSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Quantidade (use negativo para saída)</label>
+              <label className="text-sm font-medium">Quantidade (use negativo para saÃ­da)</label>
               <Input
                 type="number"
                 value={ajusteData.delta}
@@ -257,7 +257,7 @@ const ProdutosManager: React.FC = () => {
             <div>
               <label className="text-sm font-medium">Motivo</label>
               <Input
-                placeholder="Ex: correção de inventário"
+                placeholder="Ex: correÃ§Ã£o de inventÃ¡rio"
                 value={ajusteData.motivo}
                 onChange={(e) => setAjusteData({ ...ajusteData, motivo: e.target.value })}
               />
@@ -286,10 +286,10 @@ const ProdutosManager: React.FC = () => {
                 <TableHead>Categoria</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Unidade</TableHead>
-                <TableHead>Preço</TableHead>
+                <TableHead>PreÃ§o</TableHead>
                 <TableHead>Estoque</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-right">AÃ§Ãµes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -344,3 +344,4 @@ const ProdutosManager: React.FC = () => {
 }
 
 export default ProdutosManager
+

@@ -1,4 +1,4 @@
-import { Talao, ItemTal } from '@/types';
+﻿import { Talao, ItemTal } from '@/types';
 
 export function valorTotalTalao(talao: Talao): number {
   return talao.itens.reduce((total, item) => {

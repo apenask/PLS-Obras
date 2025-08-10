@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import localforage from 'localforage';
 import { 
   Obra, Produto, Fornecedor, Talao, CompraExterna, ItemCompra, 
@@ -38,7 +38,7 @@ interface Store {
   updateFornecedor: (id: ID, fornecedor: Partial<Fornecedor>) => void;
   deleteFornecedor: (id: ID) => void;
   
-  // Actions - Talões
+  // Actions - TalÃµes
   addTalao: (talao: Omit<Talao, 'id' | 'numero' | 'criadoEm'>) => void;
   updateTalao: (id: ID, talao: Partial<Talao>) => void;
   deleteTalao: (id: ID) => void;
@@ -193,7 +193,7 @@ export const useStore = create<Store>((set, get) => ({
     get().saveToStorage();
   },
   
-  // Talões actions
+  // TalÃµes actions
   addTalao: (talao) => {
     const newTalao = {
       ...talao,
@@ -223,7 +223,7 @@ export const useStore = create<Store>((set, get) => ({
     set((state) => ({
       taloes: state.taloes.map(t => 
         t.id === talaoId 
-          ? { ...t, status: 'Concluído' as TalaoStatus, assinatura }
+          ? { ...t, status: 'ConcluÃ­do' as TalaoStatus, assinatura }
           : t
       )
     }));
@@ -242,10 +242,10 @@ export const useStore = create<Store>((set, get) => ({
     const qtdDevolvida = item.qtdDevolvida || 0;
     
     if (qtd > (qtdEntregue - qtdDevolvida)) {
-      throw new Error('Quantidade de devolução maior que disponível');
+      throw new Error('Quantidade de devoluÃ§Ã£o maior que disponÃ­vel');
     }
     
-    // Registrar devolução
+    // Registrar devoluÃ§Ã£o
     const devolucao: Devolucao = {
       id: generateId(),
       talaoId,
@@ -261,12 +261,12 @@ export const useStore = create<Store>((set, get) => ({
       qtdDevolvida: qtdDevolvida + qtd
     };
     
-    // Se origem é estoque, devolver ao estoque
+    // Se origem Ã© estoque, devolver ao estoque
     if (item.origem === 'estoque' && item.produtoId) {
-      get().ajusteEstoque(item.produtoId, qtd, `Devolução do talão ${talao.numero}`);
+      get().ajusteEstoque(item.produtoId, qtd, `DevoluÃ§Ã£o do talÃ£o ${talao.numero}`);
     }
     
-    // Recalcular status do talão
+    // Recalcular status do talÃ£o
     const novosItens = talao.itens.map(i => i.id === itemTalId ? novoItem : i);
     let novoStatus: TalaoStatus = talao.status;
     
@@ -436,7 +436,7 @@ export const useStore = create<Store>((set, get) => ({
       }));
       get().saveToStorage();
     } catch (error) {
-      throw new Error('Dados inválidos para importação');
+      throw new Error('Dados invÃ¡lidos para importaÃ§Ã£o');
     }
   },
   

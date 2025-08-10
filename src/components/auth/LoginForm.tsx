@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,7 +24,7 @@ const LoginForm: React.FC = () => {
     const success = login(email, password)
     
     if (!success) {
-      setError('Email ou senha inválidos')
+      setError('Email ou senha invÃ¡lidos')
     }
     
     setLoading(false)
@@ -41,7 +41,7 @@ const LoginForm: React.FC = () => {
           </div>
           <CardTitle className="text-2xl font-bold">PLS Obras</CardTitle>
           <CardDescription>
-            Sistema de Talões Digitais & Compras Externas
+            Sistema de TalÃµes Digitais & Compras Externas
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,7 +85,7 @@ const LoginForm: React.FC = () => {
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              <p>Usuário padrão: admin@pls.com</p>
+              <p>UsuÃ¡rio padrÃ£o: admin@pls.com</p>
               <p>Senha: admin123</p>
             </div>
           </form>

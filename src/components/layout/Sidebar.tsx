@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
   Building2, 
@@ -26,7 +26,7 @@ const Sidebar: React.FC = () => {
     { path: '/fornecedores', label: 'Fornecedores', icon: Truck },
     { path: '/taloes', label: 'Talões', icon: FileText },
     { path: '/compras-externas', label: 'Compras Externas', icon: ShoppingCart },
-    { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+    { path: '/relatorios', label: 'Relatorios', icon: BarChart3 },
     { path: '/config', label: 'Configurações', icon: Settings },
   ]
 

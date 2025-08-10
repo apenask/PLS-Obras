@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -104,7 +104,7 @@ const TaloesManager: React.FC = () => {
       setDevolucaoItem(null)
       setDevolucaoData({ qtd: 0, motivo: '' })
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Erro ao registrar devolução')
+      alert(error instanceof Error ? error.message : 'Erro ao registrar devoluÃ§Ã£o')
     }
   }
 
@@ -134,7 +134,7 @@ const TaloesManager: React.FC = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este talão?')) {
+    if (window.confirm('Tem certeza que deseja excluir este talÃ£o?')) {
       deleteTalao(id)
     }
   }
@@ -185,7 +185,7 @@ const TaloesManager: React.FC = () => {
     switch (status) {
       case 'A separar': return 'bg-yellow-100 text-yellow-800'
       case 'Em entrega': return 'bg-blue-100 text-blue-800'
-      case 'Concluído': return 'bg-green-100 text-green-800'
+      case 'ConcluÃ­do': return 'bg-green-100 text-green-800'
       case 'Devolvido Parcial': return 'bg-orange-100 text-orange-800'
       case 'Devolvido Total': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
@@ -199,13 +199,13 @@ const TaloesManager: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <FileText className="mr-3 h-8 w-8 text-blue-600" />
-              Gerenciar Talões
+              Gerenciar TalÃµes
             </h1>
-            <p className="text-gray-600 mt-2">Controle de talões digitais</p>
+            <p className="text-gray-600 mt-2">Controle de talÃµes digitais</p>
           </div>
           <Button onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Novo Talão
+            Novo TalÃ£o
           </Button>
         </div>
 
@@ -213,7 +213,7 @@ const TaloesManager: React.FC = () => {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Buscar talões..."
+              placeholder="Buscar talÃµes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -238,7 +238,7 @@ const TaloesManager: React.FC = () => {
               <SelectItem value="__ALL_STATUS__">Todos os status</SelectItem>
               <SelectItem value="A separar">A separar</SelectItem>
               <SelectItem value="Em entrega">Em entrega</SelectItem>
-              <SelectItem value="Concluído">Concluído</SelectItem>
+              <SelectItem value="ConcluÃ­do">ConcluÃ­do</SelectItem>
               <SelectItem value="Devolvido Parcial">Devolvido Parcial</SelectItem>
               <SelectItem value="Devolvido Total">Devolvido Total</SelectItem>
             </SelectContent>
@@ -251,7 +251,7 @@ const TaloesManager: React.FC = () => {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingTalao ? 'Editar Talão' : 'Novo Talão'}
+              {editingTalao ? 'Editar TalÃ£o' : 'Novo TalÃ£o'}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -282,7 +282,7 @@ const TaloesManager: React.FC = () => {
 
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium">Itens do Talão</h3>
+                <h3 className="text-lg font-medium">Itens do TalÃ£o</h3>
                 <Button type="button" onClick={addItem} size="sm">
                   <Plus className="mr-2 h-4 w-4" />
                   Adicionar Item
@@ -319,11 +319,11 @@ const TaloesManager: React.FC = () => {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Descrição</label>
+                      <label className="block text-sm font-medium mb-2">DescriÃ§Ã£o</label>
                       <Input
                         value={item.descricaoLivre || ''}
                         onChange={(e) => updateItem(index, { descricaoLivre: e.target.value })}
-                        placeholder="Descrição livre"
+                        placeholder="DescriÃ§Ã£o livre"
                       />
                     </div>
                     <div>
@@ -341,7 +341,7 @@ const TaloesManager: React.FC = () => {
                       <Input
                         value={item.unidade}
                         onChange={(e) => updateItem(index, { unidade: e.target.value })}
-                        placeholder="UN, KG, M³"
+                        placeholder="UN, KG, MÂ³"
                         required
                       />
                     </div>
@@ -381,7 +381,7 @@ const TaloesManager: React.FC = () => {
                 Cancelar
               </Button>
               <Button type="submit">
-                {editingTalao ? 'Atualizar' : 'Criar Talão'}
+                {editingTalao ? 'Atualizar' : 'Criar TalÃ£o'}
               </Button>
             </div>
           </form>
@@ -405,7 +405,7 @@ const TaloesManager: React.FC = () => {
                       <p className="text-sm text-gray-600">Solicitado: {item.qtd} {item.unidade}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Já entregue: {item.qtdEntregue || 0}</p>
+                      <p className="text-sm text-gray-600">JÃ¡ entregue: {item.qtdEntregue || 0}</p>
                       <p className="text-sm text-gray-600">Devolvido: {item.qtdDevolvida || 0}</p>
                     </div>
                     <div>
@@ -427,7 +427,7 @@ const TaloesManager: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Líquido: {qtdLiquidaItem(item)}</p>
+                      <p className="text-sm font-medium">LÃ­quido: {qtdLiquidaItem(item)}</p>
                     </div>
                   </div>
                 </div>
@@ -486,11 +486,11 @@ const TaloesManager: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Devolução Dialog */}
+      {/* DevoluÃ§Ã£o Dialog */}
       <Dialog open={showDevolucaoForm} onOpenChange={setShowDevolucaoForm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Registrar Devolução</DialogTitle>
+            <DialogTitle>Registrar DevoluÃ§Ã£o</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleDevolucaoSubmit} className="space-y-4">
             <div>
@@ -498,7 +498,7 @@ const TaloesManager: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Entregue: {devolucaoItem?.item.qtdEntregue || 0} | 
                 Devolvido: {devolucaoItem?.item.qtdDevolvida || 0} | 
-                Disponível: {(devolucaoItem?.item.qtdEntregue || 0) - (devolucaoItem?.item.qtdDevolvida || 0)}
+                DisponÃ­vel: {(devolucaoItem?.item.qtdEntregue || 0) - (devolucaoItem?.item.qtdDevolvida || 0)}
               </p>
             </div>
             <div>
@@ -513,7 +513,7 @@ const TaloesManager: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Motivo da Devolução</label>
+              <label className="block text-sm font-medium mb-2">Motivo da DevoluÃ§Ã£o</label>
               <Input
                 value={devolucaoData.motivo}
                 onChange={(e) => setDevolucaoData({ ...devolucaoData, motivo: e.target.value })}
@@ -525,7 +525,7 @@ const TaloesManager: React.FC = () => {
                 Cancelar
               </Button>
               <Button type="submit">
-                Registrar Devolução
+                Registrar DevoluÃ§Ã£o
               </Button>
             </div>
           </form>
@@ -534,19 +534,19 @@ const TaloesManager: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Talões Cadastrados ({filteredTaloes.length})</CardTitle>
+          <CardTitle>TalÃµes Cadastrados ({filteredTaloes.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Número</TableHead>
+                <TableHead>NÃºmero</TableHead>
                 <TableHead>Obra</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Itens</TableHead>
                 <TableHead>Criado em</TableHead>
-                <TableHead>Ações</TableHead>
+                <TableHead>AÃ§Ãµes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -568,7 +568,7 @@ const TaloesManager: React.FC = () => {
                           <div key={item.id} className="text-xs">
                             <span className="font-medium">{item.descricaoLivre}</span>
                             <div className="text-gray-500">
-                              Env: {item.qtd} | Ent: {item.qtdEntregue || 0} | Dev: {item.qtdDevolvida || 0} | Líq: {qtdLiquidaItem(item)}
+                              Env: {item.qtd} | Ent: {item.qtdEntregue || 0} | Dev: {item.qtdDevolvida || 0} | LÃ­q: {qtdLiquidaItem(item)}
                             </div>
                           </div>
                         ))}
@@ -580,7 +580,7 @@ const TaloesManager: React.FC = () => {
                         <Button variant="outline" size="sm" onClick={() => handleEdit(talao)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        {talao.status !== 'Concluído' && (
+                        {talao.status !== 'ConcluÃ­do' && (
                           <Button variant="outline" size="sm" onClick={() => handleEntrega(talao)}>
                             <CheckCircle className="h-4 w-4" />
                           </Button>
@@ -626,7 +626,7 @@ const TaloesManager: React.FC = () => {
           
           {filteredTaloes.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm ? 'Nenhum talão encontrado' : 'Nenhum talão cadastrado'}
+              {searchTerm ? 'Nenhum talÃ£o encontrado' : 'Nenhum talÃ£o cadastrado'}
             </div>
           )}
         </CardContent>

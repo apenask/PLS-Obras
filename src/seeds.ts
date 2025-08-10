@@ -1,20 +1,20 @@
-import { useStore } from '@/store/useStore';
+﻿import { useStore } from '@/store/useStore';
 import { generateId } from '@/lib/helpers';
 
 export function loadSeedData() {
   const store = useStore.getState();
   
-  // Verificar se já tem dados
+  // Verificar se jÃ¡ tem dados
   if (store.obras.length > 0) return;
   
   // Obras
-  store.addObra({ nome: 'Obra Residencial Centro', cidade: 'São Paulo', ativo: true });
+  store.addObra({ nome: 'Obra Residencial Centro', cidade: 'SÃ£o Paulo', ativo: true });
   store.addObra({ nome: 'Obra Comercial Norte', cidade: 'Rio de Janeiro', ativo: true });
   
   // Produtos
   store.addProduto({
     nome: 'Cimento CP II-E-32',
-    categoria: 'Materiais Básicos',
+    categoria: 'Materiais BÃ¡sicos',
     unidade: 'SC',
     sku: 'CIM001',
     preco: 25.50,
@@ -23,9 +23,9 @@ export function loadSeedData() {
   });
   
   store.addProduto({
-    nome: 'Areia Média',
-    categoria: 'Materiais Básicos',
-    unidade: 'M³',
+    nome: 'Areia MÃ©dia',
+    categoria: 'Materiais BÃ¡sicos',
+    unidade: 'MÂ³',
     sku: 'ARE001',
     preco: 45.00,
     estoque: 50,
@@ -34,8 +34,8 @@ export function loadSeedData() {
   
   store.addProduto({
     nome: 'Brita 1',
-    categoria: 'Materiais Básicos',
-    unidade: 'M³',
+    categoria: 'Materiais BÃ¡sicos',
+    unidade: 'MÂ³',
     sku: 'BRI001',
     preco: 48.00,
     estoque: 30,
@@ -53,7 +53,7 @@ export function loadSeedData() {
   });
   
   store.addProduto({
-    nome: 'Vergalhão CA-50 8mm',
+    nome: 'VergalhÃ£o CA-50 8mm',
     categoria: 'Estrutura',
     unidade: 'KG',
     sku: 'VER001',
@@ -77,7 +77,7 @@ export function loadSeedData() {
     ativo: true
   });
   
-  // Talão com devolução parcial
+  // TalÃ£o com devoluÃ§Ã£o parcial
   const obras = store.obras;
   const produtos = store.produtos;
   
@@ -88,8 +88,8 @@ export function loadSeedData() {
     store.addTalao({
       id: talaoId,
       obraId: obras[0].id,
-      solicitante: 'João Silva',
-      status: 'Concluído',
+      solicitante: 'JoÃ£o Silva',
+      status: 'ConcluÃ­do',
       itens: [{
         id: itemId,
         produtoId: produtos[0].id,
@@ -108,7 +108,7 @@ export function loadSeedData() {
       }
     });
     
-    // Registrar devolução parcial
+    // Registrar devoluÃ§Ã£o parcial
     setTimeout(() => {
       store.registrarDevolucao({
         talaoId,

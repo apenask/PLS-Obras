@@ -1,4 +1,4 @@
-export type ID = string;
+﻿export type ID = string;
 
 export type Obra = {
   id: ID;
@@ -27,7 +27,7 @@ export type Fornecedor = {
   ativo: boolean;
 };
 
-export type TalaoStatus = 'A separar' | 'Em entrega' | 'Concluído' | 'Devolvido Parcial' | 'Devolvido Total';
+export type TalaoStatus = 'A separar' | 'Em entrega' | 'ConcluÃ­do' | 'Devolvido Parcial' | 'Devolvido Total';
 export type OrigemItem = 'estoque' | 'compra_externa';
 
 export type ItemTal = {
