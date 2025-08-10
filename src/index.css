@@ -61,3 +61,26 @@
     font-family: 'Inter', sans-serif;
   }
 }
+
+/* Adicione estas regras ao final de src/index.css */
+
+/* Por padrão, esconde a área de impressão na tela */
+.printable-area {
+  display: none;
+}
+
+@media print {
+  /* No modo de impressão, esconde tudo, exceto a área de impressão */
+  body > *:not(.printable-area) {
+    display: none;
+  }
+
+  /* Garante que a área de impressão seja exibida e ocupe o espaço necessário */
+  .printable-area {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
